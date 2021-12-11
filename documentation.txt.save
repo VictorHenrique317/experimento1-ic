@@ -1,0 +1,12 @@
+gerando o tensor unico -> gennsets "50 50 50" sizes.gennsets dataset.tensor
+adicionando noise -> cat dataset.tensor | num-noise "50 50 50" [correct-obs] [incorrect-obs] > [output_file]
+
+O script gera multiplos fuzzy tensors com diferentes niveis de ruido baseado nas configurações setadas no configs.json,
+-t{time}-co{correct_observations}-e{epsilon}-s{size}.multidupehack
+para cada um desses arquivos ele roda o multidupehack com diferentes valores de -s e um valor de -e fixo, ambos setados no arquivo configs.json
+
+
+
+Cada arquivo com um output de multidupehack tem seu nome no formato -t{time}-co{correct_observations}-e{epsilon}-s{size}.multidupehack
+onde {time} é o tempo de execução em segundos de multidupehack
+
