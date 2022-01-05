@@ -2,8 +2,8 @@
    "tensor_name": "dataset.tensor",
 	"correct_obs":[1,2,4,8,16,32],
 	"n_planted_patterns":4,
-	"dataset_size": [50,50,50],
-	"u_values": [0.5, 0.6, 0.7, 0.8],
-	"epsilon": 1
+	"dataset_size": [32,32,32],
+	"u_values": [0.7, 0.8],
+	"s": 3
 	
 }
