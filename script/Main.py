@@ -7,11 +7,7 @@ from Multidupehack import Multidupehack
 from Evaluation import Evaluation
 from Utils import Utils 
 
-def createFolder(path):
-    try:
-        os.makedirs(path)
-    except FileExistsError:
-        pass
+
    
 configs = None
 iterations = 3
@@ -20,9 +16,7 @@ with open("configs.json", "r") as file:
 
 for i in range(1, iterations+1):
     folder_path = f"../iterations/{i}"
-    createFolder(folder_path)
-    createFolder(folder_path + "/paf")
-    createFolder(folder_path + "/multidupehack")
+    Utils.createFolder(folder_path)
     
     Multidupehack.multidupehack(configs, i)
     Paf.paf(i)

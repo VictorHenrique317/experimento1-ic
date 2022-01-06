@@ -8,14 +8,14 @@ class Multidupehack:
         pass
 
     @staticmethod
-    def genMultidupehackName(correct_observations, epsilon, size, time):
-        return f"t{time}-co{correct_observations}-e{epsilon}-s{size}.multidupehack"
+    def genMultidupehackName(correct_observations, epsilon, size):
+        return f"co{correct_observations}-e{epsilon}-s{size}.multidupehack"
     
     @staticmethod
     def getTensorPath(multidupehack_name):
-        pattern = "-(co\d*)"
+        pattern = "(co\d*)"
         correct_observations = re.search(pattern, multidupehack_name).group()
-        return f"../fuzzy_tensors/dataset{correct_observations}.fuzzy_tensor"
+        return f"../fuzzy_tensors/dataset-{correct_observations}.fuzzy_tensor"
     
     @staticmethod
     def multidupehack(configs, iteration):
@@ -29,27 +29,25 @@ class Multidupehack:
                 counter += 1
                 e = float(f"{3**2*(1-u): .1f}")
                 
+                multidupehack_name = Multidupehack.genMultidupehackName(observations, e, s)
+                experiment_folder_name = Utils.getExperimentFolderName(multidupehack_name=multidupehack_name)
+                
+                output_folder = f"../iterations/{iteration}/{experiment_folder_name}/multidupehack"
+                Utils.createFolder(output_folder)
+                
                 #skips existing files
-                pattern = f"(t.+-co{observations}-e{e}-s{s}.multidupehack)"
-                if Utils.fileExists(pattern, f"../iterations/{iteration}/multidupehack/"):
+                pattern = f"(co{observations}-e{e}-s{s}.multidupehack)"
+                if Utils.fileExists(pattern, output_folder):
                     continue
                 
                 fuzzy_name = Noise.genFuzzyName(observations)
                 command = f"multidupehack -s'{s} {s} {s}' "
                 command += f"-e '{e} {e} {e}' ../fuzzy_tensors/{fuzzy_name} "
-                command += f"> ../iterations/{iteration}/multidupehack/temp.txt"
+                command += f"-o {output_folder}/{multidupehack_name} "
+                command += f"> {output_folder}/log.txt"
                 print("="*120)
                 print(command)
-                
-                #runs multidupehack and calculate time
-                t0 = time()
-                Utils.execute(command)
-                delta = round(time() - t0)
-                
-                #creates the FINAL file
-                multidupehackName = Multidupehack.genMultidupehackName(observations, e, s, delta)
-                command = f"mv ../iterations/{iteration}/multidupehack/temp.txt ../iterations/{iteration}/multidupehack/{multidupehackName}"
-                Utils.execute(command)
+                Utils.execute(command)                
                 
                 #prints the progression
                 print(f"({counter} of {total_count} done)")

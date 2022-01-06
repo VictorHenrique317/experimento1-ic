@@ -1,0 +1,5 @@
+Nb of density-maximized patterns: 116
+Nb of grown patterns: 116
+Nb of patterns candidates for selection: 571
+Nb of selected patterns: 11
+Total time: 0.171081s
