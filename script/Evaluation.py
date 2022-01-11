@@ -40,7 +40,7 @@ class Evaluation:
     def getPlantedPatterns():
         # ['pattern','pattern']
         patterns = None
-        with open("../tensor/dataset.tensor", "r") as pattern_file:
+        with open("../experiment/tensor/dataset.tensor", "r") as pattern_file:
             patterns = [line.replace("\n", "").strip() for line in pattern_file]
         return patterns
     

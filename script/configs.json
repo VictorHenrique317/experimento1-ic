@@ -1,9 +1,15 @@
 {
    "tensor_name": "dataset.tensor",
-	"correct_obs":[1,2,4,8,16,32],
-	"n_planted_patterns":4,
-	"dataset_size": [32,32,32],
+   "dataset_size": [32,32,32],
+   "pattern_size": 5,
+   "n_patterns":4,
+	"correct_obs":[1,2,4,8,16],
+	
 	"u_values": [0.7, 0.8],
-	"s": 3
+	"s": 3,
+	
+	"multidupehack_plot_attributes":["Mining time", "Nb of closed ET-3-sets"],
+	"paf_plot_attributes":["Total time", "Nb of selected patterns", "AICc"]
 	
 }
+

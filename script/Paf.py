@@ -24,14 +24,14 @@ class Paf:
     @staticmethod
     def getMultidupackFilePaths(iteration):
         multidupack_file_paths = []
-        for folder in os.listdir(f"../iterations/{iteration}"):
-            path = f"../iterations/{iteration}/{folder}/multidupehack/{folder}.multidupehack"
+        for folder in os.listdir(f"../experiment/iterations/{iteration}"):
+            path = f"../experiment/iterations/{iteration}/{folder}/multidupehack/{folder}.multidupehack"
             multidupack_file_paths.append(path)
             
         return multidupack_file_paths
 
     @staticmethod
-    def paf(iteration, a=1000000):
+    def run(iteration, a=1000000):
         #co16-e1-s3.6.paf
         # cat ../fuzzy_tensors/dataset-co32.fuzzy_tensor |
         # paf -vf - -a150000 t1-co32-e1-s4.5.multidupehack  
@@ -45,7 +45,7 @@ class Paf:
             paf_name = Paf.genPafName(multidupehack_file_path, a)
             experiment_folder_name = Utils.getExperimentFolderName(paf_name=paf_name)
             
-            output_folder = f"../iterations/{iteration}/{experiment_folder_name}/paf"
+            output_folder = f"../experiment/iterations/{iteration}/{experiment_folder_name}/paf"
             Utils.createFolder(output_folder)
             
             counter += 1
@@ -55,7 +55,7 @@ class Paf:
             tensor_path = Multidupehack.getTensorPath(multidupehack_name) 
             command = f"cat {tensor_path} | "
             command += f"paf -o {output_folder}/{paf_name} -f "
-            command += f"- -a{a} ../iterations/{iteration}/{experiment_folder_name}/multidupehack/{multidupehack_name} "
+            command += f"- -a{a} ../experiment/iterations/{iteration}/{experiment_folder_name}/multidupehack/{multidupehack_name} "
             command += f"> {output_folder}/log.txt"
             print("="*120)
             print(command)
