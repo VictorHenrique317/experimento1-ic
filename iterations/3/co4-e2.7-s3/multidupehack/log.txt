@@ -1,2 +1,0 @@
-Nb of closed ET-3-sets: 2747
-Total time: 0.547296s

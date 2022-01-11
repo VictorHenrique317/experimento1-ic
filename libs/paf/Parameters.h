@@ -23,8 +23,8 @@
 /* DEBUG_SELECT turns on the output (on the standard output) of information during the selection of the patterns.  This option may be enabled by who wishes to understand how a small number of patterns are selected. */
 /* #define DEBUG_SELECT */
 
-/* NUMERIC_PRECISION turns ou the output (on the standard output) of the maximal possible round-off error made when internally storing a membership degree for growing and amalgamating and, then, for selecting. */
-/* #define NUMERIC_PRECISION */
+/*NUMERIC_PRECISION turns ou the output (on the standard output) of the maximal possible round-off error made when internally storing a membership degree for growing and amalgamating and, then, for selecting. */
+#define NUMERIC_PRECISION
 
 /* NB_OF_PATTERNS turns on the output (on the standard output) of the numbers (in this order) of: */
 /* - density-maximized patterns */
@@ -34,7 +34,7 @@
 #define NB_OF_PATTERNS
 
 /* AICC turns on the output (on the standard output) of the AICc of the selected model. */
-/* #define AICC */
+#define AICC
 
 /* TIME turns on the output (on the standard output) of the run time of paf. */
 #define TIME
@@ -49,7 +49,7 @@
 /* - the amalgamation time */
 /* - the tensor reduction time */
 /* - the selection time */
-/* #define DETAILED_TIME */
+#define DETAILED_TIME
 
 /* GNUPLOT modifies the outputs of NUMERIC_PRECISION, NB_OF_PATTERNS, AICC, DETAILED_TIME and TIME.  They become tab separated values.  The output order is: */
 /* - tensor parsing time (#ifdef DETAILED_TIME) */
@@ -69,6 +69,6 @@
 /* - AICc (#ifdef AICC) */
 /* - selection time (#ifdef DETAILED_TIME) */
 /* - total time (#ifdef TIME) */
-/* #define GNUPLOT */
+#define GNUPLOT
 
 #endif /*PARAMETERS_H_*/
