@@ -9,7 +9,9 @@
 	"s": 3,
 	
 	"multidupehack_plot_attributes":["Mining time", "Nb of closed ET-3-sets"],
-	"paf_plot_attributes":["Total time", "Nb of selected patterns", "AICc"]
+	"paf_plot_attributes":["Total time", "Nb of selected patterns", "AICc"],
 	
+	"nb_of_truncated_paf_patterns": 4,
+	"evaluation_weights": [1.2, 1, 0.8, 0.6]
 }
 

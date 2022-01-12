@@ -3,6 +3,7 @@ import os
 from LogModel import LogModel
 from Utils import Utils
 from Multidupehack import Multidupehack
+from Evaluation import Evaluation
 from statistics import mean
 import re
 import matplotlib.pyplot as plt
@@ -97,42 +98,40 @@ class Analysis:
             data[key] = average
         data = collections.OrderedDict(sorted(data.items()))
         return (data.keys(), data.values())
+    
+    @staticmethod
+    def plotExperimentsByUValue(configs, experiments, attribute,color, save):
+        u_values = configs["u_values"]
+        correct_obs = configs["correct_obs"]
+        
+        for u in u_values:
+            xlabel = f"nb. of correct observations"
+            ylabel = f"{attribute}"
+            
+            filtered_experiments = Analysis.\
+                filterExperimentsByEpsilon(experiments, u)
+                
+            x,y = Analysis.getXYFromExperiments(filtered_experiments)
+            Analysis.plotGraph(x,y,u,color,xlabel,ylabel,save)
         
     @staticmethod
     def plotMultidupehackAttributeGraph(configs, attribute, color="blue", save=False):
-        u_values = configs["u_values"]
-        correct_obs = configs["correct_obs"]
-        
         experiment_averages = Analysis\
             .averageExperiments(attribute, multidupehack=True)
         
-        for u in u_values:
-            xlabel = f"nb. of correct observations"
-            ylabel = f"{attribute}"
-            
-            filtered_experiments = Analysis.\
-                filterExperimentsByEpsilon(experiment_averages, u)
-                
-            x,y = Analysis.getXYFromExperiments(filtered_experiments)
-            Analysis.plotGraph(x,y,u,color,xlabel,ylabel,save)
-            
+        Analysis.plotExperimentsByUValue(configs, experiment_averages, attribute, color, save)
+        
+    @staticmethod
+    def plotScoreGraph(configs, color, save):
+        experiments = Evaluation.evaluateFiles(configs) # {i_experiment: score}
+        Analysis.plotExperimentsByUValue(configs, experiments, "Score", color, save)
+       
     @staticmethod
     def plotPafAttributeGraph(configs, attribute, color="blue", save=False):
-        u_values = configs["u_values"]
-        correct_obs = configs["correct_obs"]
-        
         experiment_averages = Analysis\
             .averageExperiments(attribute, paf=True)
         
-        for u in u_values:
-            xlabel = f"nb. of correct observations"
-            ylabel = f"{attribute}"
-            
-            filtered_experiments = Analysis.\
-                filterExperimentsByEpsilon(experiment_averages, u)
-                
-            x,y = Analysis.getXYFromExperiments(filtered_experiments)
-            Analysis.plotGraph(x,y,u,color,xlabel,ylabel,save)
+        Analysis.plotExperimentsByUValue(configs, experiment_averages, attribute, color, save)
 
     @staticmethod
     def plotMultipleGraphs(configs, color="blue", save=False):
@@ -160,3 +159,6 @@ class Analysis:
             Analysis.plotPafAttributeGraph(configs, paf_attribute, \
                                            color=color, save=save)
             print(f"{counter} of {max_counter} done")
+        
+        Analysis.plotScoreGraph(configs, color, save)
+        
