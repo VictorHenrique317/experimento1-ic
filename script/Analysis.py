@@ -70,25 +70,34 @@ class Analysis:
         return filtered_experiments
     
     @staticmethod
-    def plotGraph(x, y, u, color, xlabel, ylabel,save):
-        fig, ax = plt.subplots()
+    def defYLimits(ylabel):
+        if ylabel == "Nb of patterns":
+            return[10**0, 10**4]
+        elif ylabel == "Run time":
+            return [10**-2, 10**2]
+        elif ylabel == "Quality":
+            return [10**-1, 10**0.05]
+        else:
+            raise ValueError(f"Y limits not defined for {ylabel}")
+    
+    @staticmethod
+    def plotGraph(x, y, u, color, xlabel, ylabel, algorithm):
         plt.scatter(x,y,color=color)
-        plt.plot(x,y, color=color)
+        plt.plot(x,y, color=color, label=algorithm)
         
+        plt.legend()
         plt.grid()
         plt.title(f"{ylabel} for u={u}")
-        plt.xlabel(xlabel)
-        plt.ylabel(ylabel)
         
-        if save is True:
-            graph_folder ="../experiment/analysis/graphs"
-            Utils.createFolder(graph_folder)
-            filename = ylabel.lower().replace(" ","-")
-            filename = f"{filename}-for-u-{u}.png"
-            plt.savefig(f"{graph_folder}/{filename}")
-            plt.close(fig)
-        else:
-            plt.show()
+        plt.xlabel(xlabel)
+        plt.xlim(max(x), min(x))
+        
+        plt.ylabel(ylabel)
+        axis = plt.gca()
+        y_limits= Analysis.defYLimits(ylabel)
+        axis.set_ylim([y_limits[0],y_limits[1]])
+        plt.yscale("log")
+        
     @staticmethod
     def getXYFromExperiments(experiments):
         data = dict()
@@ -98,67 +107,81 @@ class Analysis:
             data[key] = average
         data = collections.OrderedDict(sorted(data.items()))
         return (data.keys(), data.values())
-    
+        
     @staticmethod
-    def plotExperimentsByUValue(configs, experiments, attribute,color, save):
+    def plotExperimentsByUValue(configs, multidupehack_experiments, \
+                                paf_experiments, ylabel, save):
         u_values = configs["u_values"]
         correct_obs = configs["correct_obs"]
         
+        
         for u in u_values:
+            fig, ax = plt.subplots()
             xlabel = f"nb. of correct observations"
-            ylabel = f"{attribute}"
             
-            filtered_experiments = Analysis.\
-                filterExperimentsByEpsilon(experiments, u)
+            filtered_multidupehack_experiments = Analysis.\
+                filterExperimentsByEpsilon(multidupehack_experiments, u)
                 
-            x,y = Analysis.getXYFromExperiments(filtered_experiments)
-            Analysis.plotGraph(x,y,u,color,xlabel,ylabel,save)
-        
+            filtered_paf_experiments = Analysis.\
+                filterExperimentsByEpsilon(paf_experiments, u)
+                
+            x1,y1 = Analysis.getXYFromExperiments(filtered_multidupehack_experiments)
+            x2,y2 = Analysis.getXYFromExperiments(filtered_paf_experiments)
+            
+            Analysis.plotGraph(x1,y1,u,"blue",xlabel,ylabel, "multidupehack")
+            Analysis.plotGraph(x2,y2,u,"red",xlabel,ylabel, "paf")
+            
+            if ylabel == "Run time": 
+                # time graph, show time of multidupehack + paf
+                x3 = x1
+                y3 = Utils.sumListElements(list(y1), list(y2))
+                Analysis.plotGraph(x3, y3, u,"green",xlabel,ylabel, "multidupehack + paf")
+                            
+            if save is True:
+                graph_folder ="../experiment/analysis/graphs"
+                Utils.createFolder(graph_folder)
+                filename = ylabel.lower().replace(" ","-")
+                filename = f"{filename}-for-u-{u}.png"
+                plt.savefig(f"{graph_folder}/{filename}")
+                plt.close(fig)
+            else:
+                plt.show()
+    
     @staticmethod
-    def plotMultidupehackAttributeGraph(configs, attribute, color="blue", save=False):
-        experiment_averages = Analysis\
-            .averageExperiments(attribute, multidupehack=True)
-        
-        Analysis.plotExperimentsByUValue(configs, experiment_averages, attribute, color, save)
-        
+    def plotOverlappingGraphs(configs, multidupehack_attribute, paf_attribute,\
+                              ylabel, save=False):
+        multidupehack_experiment_averages = Analysis.\
+            averageExperiments(multidupehack_attribute, multidupehack=True)
+            
+        paf_experiment_averages = Analysis.\
+            averageExperiments(paf_attribute, paf=True)
+            
+        Analysis.plotExperimentsByUValue(configs, \
+                multidupehack_experiment_averages, paf_experiment_averages, \
+                ylabel, save)
+    
     @staticmethod
-    def plotScoreGraph(configs, color, save):
-        experiments = Evaluation.evaluateFiles(configs) # {i_experiment: score}
-        Analysis.plotExperimentsByUValue(configs, experiments, "Score", color, save)
-       
-    @staticmethod
-    def plotPafAttributeGraph(configs, attribute, color="blue", save=False):
-        experiment_averages = Analysis\
-            .averageExperiments(attribute, paf=True)
-        
-        Analysis.plotExperimentsByUValue(configs, experiment_averages, attribute, color, save)
+    def plotScoreGraph(configs, save=False):
+        multidupehack_experiments = Evaluation.evaluateMultidupehackFiles(configs) # {i_experiment: score}
+        paf_experiments = Evaluation.evaluatePafFiles(configs) # {i_experiment: score}
+        Analysis.plotExperimentsByUValue(configs, \
+                multidupehack_experiments, paf_experiments, \
+                "Quality", save)
 
     @staticmethod
-    def plotMultipleGraphs(configs, color="blue", save=False):
-        multidupehack_plot_attributes = configs["multidupehack_plot_attributes"]
-        paf_plot_attributes = configs["paf_plot_attributes"]
-        u_values = configs["u_values"]
-        counter = 0
-        max_counter = len(multidupehack_plot_attributes) + len(paf_plot_attributes)
-        max_counter *= len(u_values)
-        for multidupehack_attribute in multidupehack_plot_attributes:
-            counter += len(u_values)
-            print("="*120)
-            print("Plotting graph...")
-            
-            Analysis.plotMultidupehackAttributeGraph(configs, \
-                                                      multidupehack_attribute,\
-                                                          color=color, save=save)
-            print(f"{counter} of {max_counter} done")
+    def plotMultipleGraphs(configs, save=False):
+        plot_attributes = configs["plot_attributes"] 
+        # {"label": ["multidupehack_attribute","paf_attribute"]}
         
-        for paf_attribute in paf_plot_attributes:
-            counter += len(u_values)
-            print("="*120)
-            print("Plotting graph...")
-            
-            Analysis.plotPafAttributeGraph(configs, paf_attribute, \
-                                           color=color, save=save)
-            print(f"{counter} of {max_counter} done")
+        for label, attributes in plot_attributes.items():
+            # print("===============")
+            # print(label)
+            # print(attributes)
+            # print("Plotting graph...")
+            multidupehack_attribute = attributes[0]
+            paf_attribute = attributes[1]
+            Analysis.plotOverlappingGraphs(configs, multidupehack_attribute, \
+                                           paf_attribute, label ,save=save)
         
-        Analysis.plotScoreGraph(configs, color, save)
+        Analysis.plotScoreGraph(configs, save=save)
         

@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import re
 import os
+import shutil
 class Utils:
     def __init__(self):
         pass
@@ -31,3 +32,17 @@ class Utils:
             os.makedirs(path)
         except FileExistsError:
             pass
+    @staticmethod
+    def deleteFolder(path):
+        try:
+            shutil.rmtree(path)
+        except OSError as e:
+            print("Error: %s - %s." % (e.filename, e.strerror))
+        
+    @staticmethod
+    def sumListElements(list1, list2):
+        summed_list = []
+        for i, value1 in enumerate(list1):
+            value2 = list2[i]
+            summed_list.append(value1 + value2)
+        return summed_list

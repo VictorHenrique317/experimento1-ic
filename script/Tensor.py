@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from Utils import Utils
+import time
 class Tensor:
     def __init__(self):
         pass
@@ -21,6 +22,7 @@ class Tensor:
     
     @staticmethod
     def create(configs):
+        time.sleep(1)
         dataset_size = configs["dataset_size"]
         tensor_name = configs["tensor_name"]
         pattern_size = configs["pattern_size"]
@@ -30,13 +32,11 @@ class Tensor:
         Utils.createFolder(base_folder)
         Tensor._createSizesFile(pattern_size, n_patterns, base_folder)
         
-        if Utils.fileExists(tensor_name, base_folder):
-            print(f"Tensor file already exists, skipping creation...")
-            return
-        else:
-            command = f"gennsets '{dataset_size[0]} {dataset_size[1]} {dataset_size[2]}' "
-            command += f"{base_folder}/sizes.gennsets {base_folder}/{tensor_name} "
-            command += "> log.txt"
-            Utils.execute(command)
-            print(f"Tensor file created")
+        command = f"gennsets '{dataset_size[0]} {dataset_size[1]} {dataset_size[2]}' "
+        command += f"{base_folder}/sizes.gennsets {base_folder}/{tensor_name} "
+        command += f"> {base_folder}/log.txt"
+        Utils.execute(command)
+        print(f"Tensor file created")
+            
+
         

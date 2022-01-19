@@ -1,17 +1,21 @@
 {
+    
    "tensor_name": "dataset.tensor",
-   "dataset_size": [32,32,32],
-   "pattern_size": 5,
-   "n_patterns":4,
+   "dataset_size": [8,8,8],
+   "pattern_size": 3,
+   "n_patterns":2,
 	"correct_obs":[1,2,4,8,16],
 	
+	"nb_iterations": 2,
 	"u_values": [0.7, 0.8],
-	"s": 3,
+	"s": 2,
 	
-	"multidupehack_plot_attributes":["Mining time", "Nb of closed ET-3-sets"],
-	"paf_plot_attributes":["Total time", "Nb of selected patterns", "AICc"],
+	"plot_attributes": {
+    	"Nb of patterns": ["Nb of closed ET-3-sets", "Nb of selected patterns"],
+    	"Run time": ["Mining time", "Total time"]
+	},
+
+	"nb_of_truncated_patterns": 4
 	
-	"nb_of_truncated_paf_patterns": 4,
-	"evaluation_weights": [1.2, 1, 0.8, 0.6]
 }
 

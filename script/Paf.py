@@ -49,8 +49,6 @@ class Paf:
             Utils.createFolder(output_folder)
             
             counter += 1
-            if Utils.fileExists(paf_name, output_folder):
-                continue
             
             tensor_path = Multidupehack.getTensorPath(multidupehack_name) 
             command = f"cat {tensor_path} | "

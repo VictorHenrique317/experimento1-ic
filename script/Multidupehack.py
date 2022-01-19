@@ -39,11 +39,6 @@ class Multidupehack:
                 output_folder = f"../experiment/iterations/{iteration}/{experiment_folder_name}/multidupehack"
                 Utils.createFolder(output_folder)
                 
-                #skips existing files
-                pattern = f"(co{observations}-e{e}-s{s}.multidupehack)"
-                if Utils.fileExists(pattern, output_folder):
-                    continue
-                
                 fuzzy_name = Noise.genFuzzyName(observations)
                 command = f"multidupehack -s'{s} {s} {s}' "
                 command += f"-e '{e} {e} {e}' ../experiment/fuzzy_tensors/{fuzzy_name} "

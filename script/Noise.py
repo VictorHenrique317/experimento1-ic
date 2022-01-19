@@ -17,8 +17,6 @@ class Noise:
         for observations in correct_obs: 
             fuzzy_name = Noise.genFuzzyName(observations)
             
-            if Utils.fileExists(fuzzy_name, "../experiment/fuzzy_tensors"):
-                continue
             command = f"cat ../experiment/tensor/{tensor_name} "
             command += f"| num-noise '{dataset_size[0]} "
             command += f"{dataset_size[1]} "

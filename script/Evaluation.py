@@ -77,24 +77,24 @@ class Evaluation:
     
     @staticmethod
     def calculateScore(configs, evaluation_data):
-        evaluation_weights = configs["evaluation_weights"]
         evaluation_data = collections.OrderedDict(sorted(evaluation_data.items()))
         
         numerator = 0
-        denominator = sum(evaluation_weights)
+        denominator = 0
         for line_nb, jaccard_index in evaluation_data.items():
-            numerator += jaccard_index * evaluation_weights[line_nb]
+            numerator += jaccard_index
+            denominator += 1
             
         return numerator/denominator
         
     
     @staticmethod
-    def evaluateFile(configs, paffile_path):
+    def evaluateFile(configs, path):
         planted_patterns = Evaluation.getPlantedPatterns()
         evaluation_data = dict()
-        with open(paffile_path, "r") as paf_file:
+        with open(path, "r") as file:
             found_patterns = Evaluation.\
-                truncatePatterns(paf_file, configs["nb_of_truncated_paf_patterns"])
+                truncatePatterns(file, configs["nb_of_truncated_patterns"])
             
             for planted_pattern in planted_patterns:
                 if len(found_patterns) == 0: 
@@ -107,12 +107,28 @@ class Evaluation:
         return file_score
     
     @staticmethod
-    def evaluateFiles(configs):
+    def evaluateFiles(configs, multidupehack=False, paf=False): # IMPLEMENTAR MÉDIA
+        if multidupehack is False and paf is False:
+            raise ValueError("multidupehack or paf should be True")
+            
+        file_type = None
+        if multidupehack:
+            file_type = "multidupehack"
+        elif paf:
+            file_type = "paf"
         base_folder = "../experiment/iterations/1"
         experiments = dict()
         
         for experiment in os.listdir(base_folder):
-            paffile_path = f"{base_folder}/{experiment}/paf/{experiment}.paf"
-            value = Evaluation.evaluateFile(configs, paffile_path)
+            path = f"{base_folder}/{experiment}/{file_type}/{experiment}.{file_type}"
+            value = Evaluation.evaluateFile(configs, path)
             experiments[experiment] = value
         return experiments
+    
+    @staticmethod
+    def evaluateMultidupehackFiles(configs):
+        return Evaluation.evaluateFiles(configs, multidupehack=True)
+    
+    @staticmethod
+    def evaluatePafFiles(configs):
+        return Evaluation.evaluateFiles(configs, paf=True)
