@@ -1,18 +1,19 @@
 {
     
    "tensor_name": "dataset.tensor",
-   "dataset_size": [8,8,8],
-   "pattern_size": 3,
-   "n_patterns":2,
+   "dataset_size": [32,32,32],
+   "pattern_size": 6,
+   "n_patterns":4,
 	"correct_obs":[1,2,4,8,16],
 	
-	"nb_iterations": 2,
-	"u_values": [0.7, 0.8],
-	"s": 2,
+	"nb_iterations": 3,
+	"u_values": [0.7, 0.8, 0.9],
+	"s": 3,
 	
 	"plot_attributes": {
     	"Nb of patterns": ["Nb of closed ET-3-sets", "Nb of selected patterns"],
-    	"Run time": ["Mining time", "Total time"]
+    	"Run time": ["Mining time", "Total time"],
+    	"Memory (kb)": ["Memory", "Memory"]
 	},
 
 	"nb_of_truncated_patterns": 4

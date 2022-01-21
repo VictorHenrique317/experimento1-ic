@@ -1,6 +1,0 @@
-Numeric precision: 7.40401e-09
-Nb of closed ET-3-sets: 44
-Total time: 0.0111275s
-Parsing time: 0.0058411s
-Pre-processing time: 0.0003156s
-Mining time: 0.0026787s

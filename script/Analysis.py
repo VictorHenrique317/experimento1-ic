@@ -18,7 +18,15 @@ class Analysis:
     def calculateAttributeAverage(logs, attribute):
         values = []
         for log in logs:
-            value = log.attributes[attribute]
+            # print("====")
+            # print(log.attributes)
+            # value = log.attributes[attribute]
+            value = "0s"
+            try:
+                value = log.attributes[attribute]
+            except KeyError:
+                print(f"No attribute {attribute}")
+                
             value = float(value.replace("s",""))
             values.append(value)
         return mean(values)
@@ -70,18 +78,56 @@ class Analysis:
         return filtered_experiments
     
     @staticmethod
-    def defYLimits(ylabel):
+    def customYLimits(ylabel):
         if ylabel == "Nb of patterns":
-            return[10**0, 10**4]
+            return[10**0, 10**5]
         elif ylabel == "Run time":
             return [10**-2, 10**2]
         elif ylabel == "Quality":
             return [10**-1, 10**0.05]
+        elif ylabel == "Memory (kb)":
+            return [10**3, 10**6]
         else:
             raise ValueError(f"Y limits not defined for {ylabel}")
+            
+    @staticmethod
+    def defYLimits(u_values, multidupehack_experiments, paf_experiments):
+        max_values = []
+        min_values = []
+        for u in u_values:
+            max_multidupehack_key = max(multidupehack_experiments, \
+                                        key=multidupehack_experiments.get)
+            min_multidupehack_key = min(multidupehack_experiments, \
+                                        key=multidupehack_experiments.get)
+            max_multidupehack_value = multidupehack_experiments[max_multidupehack_key]
+            
+            min_multidupehack_value = multidupehack_experiments[min_multidupehack_key]
+            
+            
+            max_paf_key = max(paf_experiments, \
+                                        key=paf_experiments.get)
+            min_paf_key = min(paf_experiments, \
+                                        key=paf_experiments.get)
+            max_paf_value = paf_experiments[max_paf_key]
+           
+            min_paf_value = paf_experiments[min_paf_key]
+            
+            max_values.append(max([max_multidupehack_value, max_paf_value]))
+            min_values.append(min([min_multidupehack_value, min_paf_value]))
+            
+        max_value = int(max(max_values))
+        min_value = int(min(min_values))
+        
+        upper_limit = len(str(max_value))
+        upper_limit = 10**upper_limit
+        
+        lower_limit = len(str(min_value)) - 1
+        lower_limit = 10**lower_limit
+        
+        return(lower_limit, upper_limit)
     
     @staticmethod
-    def plotGraph(x, y, u, color, xlabel, ylabel, algorithm):
+    def plotGraph(x, y, u, color, xlabel, ylabel, algorithm, y_limits):
         plt.scatter(x,y,color=color)
         plt.plot(x,y, color=color, label=algorithm)
         
@@ -94,7 +140,10 @@ class Analysis:
         
         plt.ylabel(ylabel)
         axis = plt.gca()
-        y_limits= Analysis.defYLimits(ylabel)
+        
+        if y_limits is None: # them use custom ylimits
+            y_limits= Analysis.customYLimits(ylabel)
+
         axis.set_ylim([y_limits[0],y_limits[1]])
         plt.yscale("log")
         
@@ -110,10 +159,13 @@ class Analysis:
         
     @staticmethod
     def plotExperimentsByUValue(configs, multidupehack_experiments, \
-                                paf_experiments, ylabel, save):
+                                paf_experiments, ylabel, save, custom_ylimits):
         u_values = configs["u_values"]
         correct_obs = configs["correct_obs"]
         
+        y_limits = None
+        if custom_ylimits is False: # automatic generated ylimits
+            y_limits = Analysis.defYLimits(u_values, multidupehack_experiments, paf_experiments)
         
         for u in u_values:
             fig, ax = plt.subplots()
@@ -128,14 +180,14 @@ class Analysis:
             x1,y1 = Analysis.getXYFromExperiments(filtered_multidupehack_experiments)
             x2,y2 = Analysis.getXYFromExperiments(filtered_paf_experiments)
             
-            Analysis.plotGraph(x1,y1,u,"blue",xlabel,ylabel, "multidupehack")
-            Analysis.plotGraph(x2,y2,u,"red",xlabel,ylabel, "paf")
+            Analysis.plotGraph(x1,y1,u,"blue",xlabel,ylabel, "multidupehack", y_limits)
+            Analysis.plotGraph(x2,y2,u,"red",xlabel,ylabel, "paf", y_limits)
             
             if ylabel == "Run time": 
                 # time graph, show time of multidupehack + paf
                 x3 = x1
                 y3 = Utils.sumListElements(list(y1), list(y2))
-                Analysis.plotGraph(x3, y3, u,"green",xlabel,ylabel, "multidupehack + paf")
+                Analysis.plotGraph(x3, y3, u,"green",xlabel,ylabel, "multidupehack + paf", y_limits)
                             
             if save is True:
                 graph_folder ="../experiment/analysis/graphs"
@@ -149,7 +201,7 @@ class Analysis:
     
     @staticmethod
     def plotOverlappingGraphs(configs, multidupehack_attribute, paf_attribute,\
-                              ylabel, save=False):
+                              ylabel, save=False, custom_ylimits=True):
         multidupehack_experiment_averages = Analysis.\
             averageExperiments(multidupehack_attribute, multidupehack=True)
             
@@ -158,30 +210,27 @@ class Analysis:
             
         Analysis.plotExperimentsByUValue(configs, \
                 multidupehack_experiment_averages, paf_experiment_averages, \
-                ylabel, save)
+                ylabel, save, custom_ylimits)
     
     @staticmethod
-    def plotScoreGraph(configs, save=False):
+    def plotScoreGraph(configs, save=False, custom_ylimits=True):
         multidupehack_experiments = Evaluation.evaluateMultidupehackFiles(configs) # {i_experiment: score}
         paf_experiments = Evaluation.evaluatePafFiles(configs) # {i_experiment: score}
         Analysis.plotExperimentsByUValue(configs, \
                 multidupehack_experiments, paf_experiments, \
-                "Quality", save)
+                "Quality", save, custom_ylimits)
 
     @staticmethod
-    def plotMultipleGraphs(configs, save=False):
+    def plotMultipleGraphs(configs, save=False, custom_ylimits=True):
         plot_attributes = configs["plot_attributes"] 
         # {"label": ["multidupehack_attribute","paf_attribute"]}
         
         for label, attributes in plot_attributes.items():
-            # print("===============")
-            # print(label)
-            # print(attributes)
-            # print("Plotting graph...")
             multidupehack_attribute = attributes[0]
             paf_attribute = attributes[1]
             Analysis.plotOverlappingGraphs(configs, multidupehack_attribute, \
-                                           paf_attribute, label ,save=save)
+                                           paf_attribute, label ,save=save, \
+                                           custom_ylimits=custom_ylimits)
         
-        Analysis.plotScoreGraph(configs, save=save)
+        Analysis.plotScoreGraph(configs, save=save, custom_ylimits=custom_ylimits)
         

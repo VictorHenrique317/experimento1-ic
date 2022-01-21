@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import collections
 import os
+from statistics import mean
 class Evaluation:
     def __init__(self):
         pass
@@ -85,7 +86,10 @@ class Evaluation:
             numerator += jaccard_index
             denominator += 1
             
-        return numerator/denominator
+        if denominator == 0:
+            return 0
+        else:
+            return numerator/denominator
         
     
     @staticmethod
@@ -107,6 +111,19 @@ class Evaluation:
         return file_score
     
     @staticmethod
+    def getIterationNumber():
+        return [iteration for iteration in os.listdir("../experiment/iterations")]
+    
+    @staticmethod
+    def averageScores(experiments):
+        averaged_experiments = dict() # {i_experiment: average_value}       
+        
+        for experiment, values in experiments.items():
+            averaged_experiments[experiment] = mean(values)
+            
+        return averaged_experiments
+    
+    @staticmethod
     def evaluateFiles(configs, multidupehack=False, paf=False): # IMPLEMENTAR MÉDIA
         if multidupehack is False and paf is False:
             raise ValueError("multidupehack or paf should be True")
@@ -116,14 +133,19 @@ class Evaluation:
             file_type = "multidupehack"
         elif paf:
             file_type = "paf"
-        base_folder = "../experiment/iterations/1"
-        experiments = dict()
+            
+        base_folder = None
+        experiments = dict() # {i_experiment: [value1, value2, ...]}
+        for iteration in Evaluation.getIterationNumber():
+            base_folder = f"../experiment/iterations/{iteration}"
+            
+            for experiment in os.listdir(base_folder):
+                path = f"{base_folder}/{experiment}/{file_type}/{experiment}.{file_type}"
+                value = Evaluation.evaluateFile(configs, path)
+                experiments.setdefault(experiment, [])
+                experiments[experiment].append(value)
         
-        for experiment in os.listdir(base_folder):
-            path = f"{base_folder}/{experiment}/{file_type}/{experiment}.{file_type}"
-            value = Evaluation.evaluateFile(configs, path)
-            experiments[experiment] = value
-        return experiments
+        return Evaluation.averageScores(experiments)
     
     @staticmethod
     def evaluateMultidupehackFiles(configs):

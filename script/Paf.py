@@ -14,12 +14,10 @@ class Paf:
         return re.findall(pattern, multidupehack_file_path)[0]
 
     @staticmethod
-    def genPafName(multidupehack_file_path, a):
+    def genPafName(multidupehack_file_path):
         multidupehack_name = Paf.getMultidupehackName(multidupehack_file_path)
-        if a == 1000000: # dont show a
-           return f"{multidupehack_name.replace('.multidupehack', '')}.paf"
-        else: # show a
-            return f"{multidupehack_name.replace('.multidupehack', '')}-a{a}.paf"
+        return f"{multidupehack_name.replace('.multidupehack', '')}.paf"
+      
         
     @staticmethod
     def getMultidupackFilePaths(iteration):
@@ -42,7 +40,7 @@ class Paf:
             # pattern = "-(co\d*-e\d*\.\d*-s\d*\.\d*)"
            
             multidupehack_name = Paf.getMultidupehackName(multidupehack_file_path)
-            paf_name = Paf.genPafName(multidupehack_file_path, a)
+            paf_name = Paf.genPafName(multidupehack_file_path)
             experiment_folder_name = Utils.getExperimentFolderName(paf_name=paf_name)
             
             output_folder = f"../experiment/iterations/{iteration}/{experiment_folder_name}/paf"
@@ -51,10 +49,11 @@ class Paf:
             counter += 1
             
             tensor_path = Multidupehack.getTensorPath(multidupehack_name) 
-            command = f"cat {tensor_path} | "
+            command = f"/usr/bin/time -o {output_folder}/log.txt -f 'Memory: %M' "
+            command += f"cat {tensor_path} | "
             command += f"paf -o {output_folder}/{paf_name} -f "
             command += f"- -a{a} ../experiment/iterations/{iteration}/{experiment_folder_name}/multidupehack/{multidupehack_name} "
-            command += f"> {output_folder}/log.txt"
+            command += f">> {output_folder}/log.txt"
             print("="*120)
             print(command)
             

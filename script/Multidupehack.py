@@ -40,10 +40,11 @@ class Multidupehack:
                 Utils.createFolder(output_folder)
                 
                 fuzzy_name = Noise.genFuzzyName(observations)
-                command = f"multidupehack -s'{s} {s} {s}' "
+                command = f"/usr/bin/time -o {output_folder}/log.txt -f 'Memory: %M' "
+                command += f"multidupehack -s'{s} {s} {s}' "
                 command += f"-e '{e} {e} {e}' ../experiment/fuzzy_tensors/{fuzzy_name} "
                 command += f"-o {output_folder}/{multidupehack_name} "
-                command += f"> {output_folder}/log.txt"
+                command += f">> {output_folder}/log.txt"
                 print("="*120)
                 print(command)
                 Utils.execute(command)                

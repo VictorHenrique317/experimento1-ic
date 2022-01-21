@@ -25,8 +25,6 @@ for i in range(1, configs["nb_iterations"]+1):
     
     Multidupehack.run(configs, i)
     Paf.run(i)
+    # Paf.run(i,a=10) # resultados estranhos
 
-Analysis.plotMultipleGraphs(configs, save=True)
-
-# Evaluation.evaluateFile("../paf/t0-co1-e2.7-s3.paf")
-# Evaluation.evaluateFiles(configs)
+Analysis.plotMultipleGraphs(configs, save=True, custom_ylimits=True)
