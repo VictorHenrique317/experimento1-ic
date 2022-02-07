@@ -1,18 +1,18 @@
-Memory: 1864
-Tensor parsing time: 0.130461s
-Numeric precision: 5.61814e-08
-Tensor shifting time: 0.008845s
-Initial density maximization time: 0.433136s
+Memory: 2004
+Tensor parsing time: 0.129015s
+Numeric precision: 5.17764e-08
+Tensor shifting time: 0.0069342s
+Initial density maximization time: 0.400989s
 Initial sub-pattern discarding time: 0s
-Nb of density-maximized patterns: 135
-Further growing time: 5e-06s
-Nb of grown patterns: 135
-Amalgamation initialization time: 0.0171821s
-Amalgamation time: 0.0017685s
-Nb of patterns candidates for selection: 9056
-Numeric precision: 2.74968e-08
-Tensor reduction time: 0.001615s
-Nb of selected patterns: 12
-AICc: 212905.276398
-Selection time: 0.0794054s
-Total time: 0.6772288s
+Nb of density-maximized patterns: 128
+Further growing time: 4.8e-06s
+Nb of grown patterns: 128
+Amalgamation initialization time: 0.0190037s
+Amalgamation time: 0.0013492s
+Nb of patterns candidates for selection: 9340
+Numeric precision: 3.45464e-08
+Tensor reduction time: 0.0015597s
+Nb of selected patterns: 13
+AICc: 213042.408294
+Selection time: 0.0810841s
+Total time: 0.6442988s

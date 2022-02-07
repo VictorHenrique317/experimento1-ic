@@ -21,8 +21,11 @@ class Paf:
         
     @staticmethod
     def getMultidupackFilePaths(iteration):
+        experiments_pattern = "co\d*"
         multidupack_file_paths = []
         for folder in os.listdir(f"../experiment/iterations/{iteration}"):
+            if re.search(experiments_pattern, folder) is None: # picked wrong folder
+                continue
             path = f"../experiment/iterations/{iteration}/{folder}/multidupehack/{folder}.multidupehack"
             multidupack_file_paths.append(path)
             
@@ -30,14 +33,9 @@ class Paf:
 
     @staticmethod
     def run(iteration, a=1000000):
-        #co16-e1-s3.6.paf
-        # cat ../fuzzy_tensors/dataset-co32.fuzzy_tensor |
-        # paf -vf - -a150000 t1-co32-e1-s4.5.multidupehack  
-    
         counter = 0
         multidupack_file_paths = Paf.getMultidupackFilePaths(iteration)
         for multidupehack_file_path in multidupack_file_paths:
-            # pattern = "-(co\d*-e\d*\.\d*-s\d*\.\d*)"
            
             multidupehack_name = Paf.getMultidupehackName(multidupehack_file_path)
             paf_name = Paf.genPafName(multidupehack_file_path)
@@ -48,7 +46,7 @@ class Paf:
             
             counter += 1
             
-            tensor_path = Multidupehack.getTensorPath(multidupehack_name) 
+            tensor_path = Multidupehack.getTensorPath(multidupehack_name, iteration) 
             command = f"/usr/bin/time -o {output_folder}/log.txt -f 'Memory: %M' "
             command += f"cat {tensor_path} | "
             command += f"paf -o {output_folder}/{paf_name} -f "

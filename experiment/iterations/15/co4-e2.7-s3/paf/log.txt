@@ -1,0 +1,18 @@
+Memory: 2016
+Tensor parsing time: 0.127716s
+Numeric precision: 5.3643e-08
+Tensor shifting time: 0.0068322s
+Initial density maximization time: 0.382356s
+Initial sub-pattern discarding time: 0s
+Nb of density-maximized patterns: 154
+Further growing time: 6.1e-06s
+Nb of grown patterns: 154
+Amalgamation initialization time: 0.0261064s
+Amalgamation time: 0.0030527s
+Nb of patterns candidates for selection: 8784
+Numeric precision: 2.79848e-08
+Tensor reduction time: 0.001467s
+Nb of selected patterns: 11
+AICc: 212932.952805
+Selection time: 0.0637825s
+Total time: 0.6157187s

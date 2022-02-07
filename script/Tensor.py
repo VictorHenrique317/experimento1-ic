@@ -21,14 +21,14 @@ class Tensor:
         
     
     @staticmethod
-    def create(configs):
+    def create(configs, iteration):
         time.sleep(1)
         dataset_size = configs["dataset_size"]
         tensor_name = configs["tensor_name"]
         pattern_size = configs["pattern_size"]
         n_patterns = configs["n_patterns"]
         
-        base_folder = "../experiment/tensor"
+        base_folder = f"../experiment/iterations/{iteration}/tensor"
         Utils.createFolder(base_folder)
         Tensor._createSizesFile(pattern_size, n_patterns, base_folder)
         

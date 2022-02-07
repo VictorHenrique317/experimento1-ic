@@ -16,10 +16,10 @@ class Multidupehack:
         return f"co{correct_observations}-e{epsilon}-s{size}.multidupehack"
     
     @staticmethod
-    def getTensorPath(multidupehack_name):
+    def getTensorPath(multidupehack_name, iteration):
         pattern = "(co\d*)"
         correct_observations = re.search(pattern, multidupehack_name).group()
-        return f"../experiment/fuzzy_tensors/dataset-{correct_observations}.fuzzy_tensor"
+        return f"../experiment/iterations/{iteration}/fuzzy_tensors/dataset-{correct_observations}.fuzzy_tensor"
     
     @staticmethod
     def run(configs, iteration):
@@ -42,7 +42,7 @@ class Multidupehack:
                 fuzzy_name = Noise.genFuzzyName(observations)
                 command = f"/usr/bin/time -o {output_folder}/log.txt -f 'Memory: %M' "
                 command += f"multidupehack -s'{s} {s} {s}' "
-                command += f"-e '{e} {e} {e}' ../experiment/fuzzy_tensors/{fuzzy_name} "
+                command += f"-e '{e} {e} {e}' ../experiment/iterations/{iteration}/fuzzy_tensors/{fuzzy_name} "
                 command += f"-o {output_folder}/{multidupehack_name} "
                 command += f">> {output_folder}/log.txt"
                 print("="*120)

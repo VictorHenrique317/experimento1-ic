@@ -1,7 +1,7 @@
-Memory: 15320
+Memory: 15288
 ion: 2.39047e-07
-Nb of closed ET-3-sets: 7261
-Total time: 19.9081s
-Parsing time: 0.196396s
-Pre-processing time: 0.010786s
-Mining time: 19.667s
+Nb of closed ET-3-sets: 7640
+Total time: 20.5847s
+Parsing time: 0.176023s
+Pre-processing time: 0.0089131s
+Mining time: 20.3716s

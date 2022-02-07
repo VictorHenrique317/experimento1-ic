@@ -18,9 +18,6 @@ class Analysis:
     def calculateAttributeAverage(logs, attribute):
         values = []
         for log in logs:
-            # print("====")
-            # print(log.attributes)
-            # value = log.attributes[attribute]
             value = "0s"
             try:
                 value = log.attributes[attribute]
@@ -40,11 +37,14 @@ class Analysis:
             log_type = "multidupehack"
         else:
             raise ValueError("Especify paf or multidupehack log type") 
-        
+            
+        experiments_pattern = "co\d*"
         data = dict() # {i_experiment: [log1, log2, ..., logn]}
         for iteration in os.listdir(Analysis.base_folder):
             path = f"{Analysis.base_folder}/{iteration}"
             for experiment in os.listdir(path):
+                if re.search(experiments_pattern, experiment) is None: # picked wrong folder
+                    continue
                 log_path = f"{path}/{experiment}/{log_type}/log.txt"
                 log = LogModel(log_path)
                 
@@ -70,7 +70,6 @@ class Analysis:
     def filterExperimentsByEpsilon(experiments, u):
         epsilon = Multidupehack.calculateEpsilon(u)
         filtered_experiments = dict()
-        
         for experiment, average in experiments.items():
             if re.search(f"e{epsilon}", experiment) != None: # found
                 filtered_experiments[experiment] = average
@@ -82,9 +81,9 @@ class Analysis:
         if ylabel == "Nb of patterns":
             return[10**0, 10**5]
         elif ylabel == "Run time":
-            return [10**-2, 10**2]
+            return [10**-2, 10**3]
         elif ylabel == "Quality":
-            return [10**-1, 10**0.05]
+            return [0, 1.1]
         elif ylabel == "Memory (kb)":
             return [10**3, 10**6]
         else:
@@ -130,7 +129,6 @@ class Analysis:
     def plotGraph(x, y, u, color, xlabel, ylabel, algorithm, y_limits):
         plt.scatter(x,y,color=color)
         plt.plot(x,y, color=color, label=algorithm)
-        
         plt.legend()
         plt.grid()
         plt.title(f"{ylabel} for u={u}")
@@ -145,7 +143,9 @@ class Analysis:
             y_limits= Analysis.customYLimits(ylabel)
 
         axis.set_ylim([y_limits[0],y_limits[1]])
-        plt.yscale("log")
+        if ylabel.lower() != "quality":
+            plt.yscale("log")
+        plt.xscale("log", base=2)
         
     @staticmethod
     def getXYFromExperiments(experiments):
@@ -155,7 +155,8 @@ class Analysis:
             key = float(key)
             data[key] = average
         data = collections.OrderedDict(sorted(data.items()))
-        return (data.keys(), data.values())
+        xy = (data.keys(), data.values())
+        return xy
         
     @staticmethod
     def plotExperimentsByUValue(configs, multidupehack_experiments, \
@@ -188,7 +189,6 @@ class Analysis:
                 x3 = x1
                 y3 = Utils.sumListElements(list(y1), list(y2))
                 Analysis.plotGraph(x3, y3, u,"green",xlabel,ylabel, "multidupehack + paf", y_limits)
-                            
             if save is True:
                 graph_folder ="../experiment/analysis/graphs"
                 Utils.createFolder(graph_folder)

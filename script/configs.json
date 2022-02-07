@@ -6,8 +6,8 @@
    "n_patterns":4,
 	"correct_obs":[1,2,4,8,16],
 	
-	"nb_iterations": 3,
-	"u_values": [0.7, 0.8, 0.9],
+	"nb_iterations": 30,
+	"u_values": [0.6, 0.7, 0.8],
 	"s": 3,
 	
 	"plot_attributes": {
@@ -16,7 +16,9 @@
     	"Memory (kb)": ["Memory", "Memory"]
 	},
 
-	"nb_of_truncated_patterns": 4
+	"nb_of_truncated_patterns": 40000000000
 	
 }
+
+
 

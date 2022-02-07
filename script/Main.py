@@ -17,8 +17,8 @@ with open("configs.json", "r") as file:
 
 Utils.deleteFolder("../experiment")
 for i in range(1, configs["nb_iterations"]+1):
-    Tensor.create(configs)
-    Noise.run(configs)
+    Tensor.create(configs, i)
+    Noise.run(configs, i)
     
     base_folder = f"../experiment/iterations/{i}"
     Utils.createFolder(base_folder)

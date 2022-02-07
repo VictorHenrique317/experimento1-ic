@@ -1,0 +1,4 @@
+Memory: 1908
+Tensor parsing time: 0.124587s
+Numeric precision: 5.72113e-08
+Tensor shifting time: 0.0073939s
