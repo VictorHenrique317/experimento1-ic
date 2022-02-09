@@ -7,6 +7,7 @@ from Evaluation import Evaluation
 from statistics import mean
 import re
 import matplotlib.pyplot as plt
+import matplotlib.ticker
 import collections
 
 class Analysis:
@@ -146,7 +147,11 @@ class Analysis:
         if ylabel.lower() != "quality":
             plt.yscale("log")
         plt.xscale("log", base=2)
+        axis.get_xaxis().set_major_formatter(matplotlib.ticker.ScalarFormatter())
+        axis.get_xaxis().set_minor_formatter(matplotlib.ticker.NullFormatter())
         
+        axis.get_yaxis().set_major_formatter(matplotlib.ticker.ScalarFormatter())
+        axis.get_yaxis().set_minor_formatter(matplotlib.ticker.NullFormatter())
     @staticmethod
     def getXYFromExperiments(experiments):
         data = dict()

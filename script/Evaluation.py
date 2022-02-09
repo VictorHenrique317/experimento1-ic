@@ -103,6 +103,9 @@ class Evaluation:
     
     @staticmethod
     def truncatePatterns(paf_file, number):
+        if number == -1:
+            return [pattern.replace("\n", "") for pattern in paf_file]
+        
         counter = 0
         truncated_patterns = []
         for pattern in paf_file:

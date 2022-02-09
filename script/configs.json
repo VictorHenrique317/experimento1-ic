@@ -16,7 +16,8 @@
     	"Memory (kb)": ["Memory", "Memory"]
 	},
 
-	"nb_of_truncated_patterns": 40000000000
+	"nb_of_truncated_patterns": -1,
+	"getf_max_pattern_number": 4
 	
 }
 
