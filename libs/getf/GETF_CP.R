@@ -302,24 +302,65 @@ GETF_CP<-function(TENS,Thres=0.6,B_num=20,COVER=0.9,Exhausive=F){
 
 
 Reconstruct_error<-function(TENS,BASIS){
-  if(is.null(dim(BASIS[[1]]))){
+  # print(class(BASIS[1]))
+  # print(class(BASIS[[1]]))
+  # print(dim(BASIS[[1]]))
+  # print(BASIS[[1]])
+  if(is.null(dim(BASIS[[1]]))){ # se a dimensão do primeiro fator for nula 
     TENS_compare<-BASIS[[1]]
     for (i in 2:length(BASIS)) {
       TENS_compare<-TENS_compare%o%BASIS[[i]]
     }
-  }else{
-    TENS_compare<-0*TENS
-    for (j in 1:ncol(BASIS[[1]])) {
-      TENS_temp<-BASIS[[1]][,j]
-      for (i in 2:length(BASIS)) {
+  }else{ # parte importante
+    # print("Parte importante ===>")
+    TENS_compare<-0*TENS # monta matriz nula a partir do tamanho do TENS
+    
+    for (j in 1:ncol(BASIS[[1]])) { # j assume os valores de 1 até o número de colunas do primeiro fator
+      TENS_temp<-BASIS[[1]][,j] # pega todas as linhas da j-ésima coluna (pega a j-ésima coluna)
+      for (i in 2:length(BASIS)) { # i assume os valores de 2 até o numero de fatores
         TENS_temp<-TENS_temp%o%BASIS[[i]][,j]
       }
+      
+      # TENS_temp = Factor matrix
+      # TENS_temp da a posição dos padrões ???
+      print(TENS_temp)
       TENS_compare<-TENS_compare+TENS_temp
+     
     }
   }
   
+  # print(TENS_compare)
   TENS_compare<-array(as.numeric(TENS_compare>0),dim=dim(TENS_compare))
+  # print(TENS_compare)
+  # o algoritmo calcula o outer product da coluna j de todos os fatores e soma na matriz nula
+  # depois muda para a coluna j+1 e calcula novamente e soma na matriz resultante (iterativamente)
   return(sum(abs(TENS-TENS_compare))/prod(dim(TENS)))
+}
+
+Get_Patterns<-function(TENS,BASIS){
+  Patterns <- list()
+  if(is.null(dim(BASIS[[1]]))){ 
+    TENS_temp<-BASIS[[1]]
+    for (i in 2:length(BASIS)) {
+      TENS_temp<-TENS_temp%o%BASIS[[i]]
+    }
+
+    Patterns[[j]] <- array(as.numeric(TENS_temp>0),dim=dim(TENS_temp))
+  }else{ 
+    TENS_compare<-0*TENS 
+    
+    i <- 0
+    for (j in 1:ncol(BASIS[[1]])) {
+      TENS_temp<-BASIS[[1]][,j] 
+      for (i in 2:length(BASIS)) {
+        TENS_temp<-TENS_temp%o%BASIS[[i]][,j]
+      }
+      
+      Patterns[[j]] <- array(as.numeric(TENS_temp>0),dim=dim(TENS_temp))
+    }
+  }
+  
+  return(Patterns)
 }
 
 
@@ -344,5 +385,4 @@ Tensor_Simulate<-function(Dims,pattern=5,density=0.2,Noise=0.01){
   TENS<-abs(TENS-array(rbinom(prod(Dims),1,Noise),dim=Dims))
   return(TENS)
 }
-
 

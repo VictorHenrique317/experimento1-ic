@@ -2,8 +2,11 @@
 import collections
 import os
 import re
+import time
 from statistics import mean
 class Evaluation:
+    __dimension = None
+
     def __init__(self):
         pass
     
@@ -19,8 +22,7 @@ class Evaluation:
             return pattern 
         
         pattern =  pattern.split(" ")
-        dimension = Evaluation.getDimension()
-        if len(pattern) > dimension:
+        if len(pattern) > Evaluation.__dimension:
             del pattern[-1] # deletes the density of the pattern found by paf
             
         return [set(numbers.split(",")) for numbers in pattern]
@@ -33,25 +35,23 @@ class Evaluation:
         return formated
     
     @staticmethod
-    def patternIntersection(found_pattern, planted_pattern): # 1,2 0,1 10,11
-        found_pattern = Evaluation.formatPattern(found_pattern)
-        planted_pattern = Evaluation.formatPattern(planted_pattern)
-        dimension = Evaluation.getDimension()
+    def patternIntersection(found_pattern, planted_pattern): # 1,2 0,1 10,11 # too slow
+        # found_pattern = Evaluation.formatPattern(found_pattern)
+        # planted_pattern = Evaluation.formatPattern(planted_pattern)
         intersection = []
-        for i in range(dimension):
+        for i in range(Evaluation.__dimension):
             ith_tuple1 = found_pattern[i] # {'1', '2'}
             ith_tuple2 = planted_pattern[i] # {'1', '3'}
             intersection.append(ith_tuple1.intersection(ith_tuple2))
         return intersection
     
     @staticmethod
-    def patternUnion(found_pattern, planted_pattern): # 1,2 0,1 10,11
+    def patternUnion(found_pattern, planted_pattern): # 1,2 0,1 10,11 # too slow
         union = []
-        found_pattern = Evaluation.formatPattern(found_pattern)
-        planted_pattern = Evaluation.formatPattern(planted_pattern)
-        dimension = Evaluation.getDimension()
+        # found_pattern = Evaluation.formatPattern(found_pattern)
+        # planted_pattern = Evaluation.formatPattern(planted_pattern)
         
-        for i in range(dimension):
+        for i in range(Evaluation.__dimension):
             ith_tuple1 = found_pattern[i] # {'1', '2'}
             ith_tuple2 = planted_pattern[i] # {'1', '3'}
             union.append(ith_tuple1.union(ith_tuple2))
@@ -84,11 +84,13 @@ class Evaluation:
     def findMostSimilarFoundPattern(planted_pattern, found_patterns): 
         # returns the most similar found pattern to a given planted one
         similarities = []
-        
+        index = 0
+        planted_pattern = Evaluation.formatPattern(planted_pattern)
         for found_pattern in found_patterns:
-            jaccard_index = Evaluation.jaccardIndex(found_pattern, planted_pattern)
+            index += 1
+            found_pattern = Evaluation.formatPattern(found_pattern)
+            jaccard_index = Evaluation.jaccardIndex(found_pattern, planted_pattern)  # too slow
             similarities.append(jaccard_index)
-            
         most_similar_index = similarities.index(max(similarities))
         most_similar_pattern = found_patterns[most_similar_index]
         return most_similar_pattern
@@ -117,10 +119,9 @@ class Evaluation:
     
     @staticmethod
     def multiplePatternUnion(patterns):
-        dimension = Evaluation.getDimension()
-        union = [set() for i in range(dimension)]
+        union = [set() for i in range(Evaluation.__dimension)]
         for pattern in patterns:
-            for i in range(dimension):
+            for i in range(Evaluation.__dimension):
                 ith_union_component = union[i]
                 ith_pattern_component = pattern[i]
                 union[i] = ith_union_component.union(ith_pattern_component)
@@ -135,7 +136,7 @@ class Evaluation:
         return union_area
         
     @staticmethod
-    def calculateQualityMeasure(configs, path):
+    def calculateQualityMeasure(configs, path, truncate):
         iteration_pattern = "\.\.\/experiment\/iterations\/(\d*)\/"
         iteration = re.search(iteration_pattern, path)[1]
         planted_patterns = Evaluation.getPlantedPatterns(iteration)
@@ -143,28 +144,38 @@ class Evaluation:
         all_p_intersection_argmax = []
         
         with open(path, "r") as file:
-            found_patterns = Evaluation.\
-                truncatePatterns(file, configs["nb_of_truncated_patterns"])
+            if truncate is True:
+                found_patterns = Evaluation.\
+                    truncatePatterns(file, configs["nb_of_truncated_patterns"])
+            else:
+                found_patterns = Evaluation.\
+                    truncatePatterns(file, -1)
                 
         if len(found_patterns) == 0: # no patterns found by the algorithm
             return 0 # zero quality
         
+        counter = 0
         for planted_pattern in planted_patterns:
+            planted_pattern = Evaluation.formatPattern(planted_pattern)
+
+            counter += 1
+            print(f"{100*counter/len(planted_patterns): .2f}%...")
             most_similar_found = Evaluation.\
                     findMostSimilarFoundPattern(planted_pattern, found_patterns)
+            most_similar_found = Evaluation.formatPattern(most_similar_found)
 
             p_intersection_argmax = Evaluation.\
                     patternIntersection(most_similar_found, planted_pattern)
-            
             all_p_intersection_argmax.append(p_intersection_argmax)
         
         numerator = Evaluation.multiplePatternUnionArea(all_p_intersection_argmax)
-
+        
         planted_patterns = Evaluation.formatMultiplePatterns(planted_patterns)
         found_patterns = Evaluation.formatMultiplePatterns(found_patterns)
         
         planted_patterns_union = Evaluation.multiplePatternUnion(planted_patterns)
         found_patterns_union = Evaluation.multiplePatternUnion(found_patterns)
+
         denominator = Evaluation.\
             patternUnion(planted_patterns_union, found_patterns_union)
         denominator = Evaluation.calculatePatternArea(denominator)
@@ -184,7 +195,8 @@ class Evaluation:
         return averaged_experiments
     
     @staticmethod
-    def evaluateFiles(configs, multidupehack=False, paf=False): 
+    def evaluateFiles(configs, multidupehack=False, paf=False, truncate=False): 
+        Evaluation.__dimension = Evaluation.getDimension()
         if multidupehack is False and paf is False:
             raise ValueError("multidupehack or paf should be True")
             
@@ -204,7 +216,8 @@ class Evaluation:
                 if re.search(experiments_pattern, experiment) is None: # picked wrong folder
                     continue
                 path = f"{base_folder}/{experiment}/{file_type}/{experiment}.{file_type}"
-                value = Evaluation.calculateQualityMeasure(configs, path)
+                print(f"Evaluating {path}")
+                value = Evaluation.calculateQualityMeasure(configs, path, truncate)
                 experiments.setdefault(experiment, [])
                 experiments[experiment].append(value)
         
@@ -215,5 +228,5 @@ class Evaluation:
         return Evaluation.evaluateFiles(configs, multidupehack=True)
     
     @staticmethod
-    def evaluatePafFiles(configs):
-        return Evaluation.evaluateFiles(configs, paf=True)
+    def evaluatePafFiles(configs, truncate=False):
+        return Evaluation.evaluateFiles(configs, paf=True, truncate=truncate)

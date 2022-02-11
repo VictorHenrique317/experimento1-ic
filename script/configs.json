@@ -6,7 +6,7 @@
    "n_patterns":4,
 	"correct_obs":[1,2,4,8,16],
 	
-	"nb_iterations": 30,
+	"nb_iterations": 1,
 	"u_values": [0.6, 0.7, 0.8],
 	"s": 3,
 	
@@ -16,8 +16,8 @@
     	"Memory (kb)": ["Memory", "Memory"]
 	},
 
-	"nb_of_truncated_patterns": -1,
-	"getf_max_pattern_number": 4
+	"nb_of_truncated_patterns": 4,
+	"getf_max_pattern_number": 100
 	
 }
 

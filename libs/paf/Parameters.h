@@ -69,6 +69,6 @@
 /* - AICc (#ifdef AICC) */
 /* - selection time (#ifdef DETAILED_TIME) */
 /* - total time (#ifdef TIME) */
-#define GNUPLOT
+/* #define GNUPLOT */
 
 #endif /*PARAMETERS_H_*/

@@ -18,13 +18,11 @@ class Utils:
                 return True
             
     @staticmethod
-    def getExperimentFolderName(multidupehack_name=None, paf_name=None, getf_name=None):
+    def getExperimentFolderName(multidupehack_name=None, paf_name=None):
         if multidupehack_name is not None:
             return re.sub(".multidupehack", "", multidupehack_name)
         elif paf_name is not None:
             return re.sub(".paf", "", paf_name)
-        elif getf_name is not None:
-            return re.sub(".getf", "", getf_name)
         else:
             raise ValueError("Parameters all None")
         

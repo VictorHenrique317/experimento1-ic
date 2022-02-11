@@ -165,7 +165,8 @@ class Analysis:
         
     @staticmethod
     def plotExperimentsByUValue(configs, multidupehack_experiments, \
-                                paf_experiments, ylabel, save, custom_ylimits):
+                                paf_experiments, ylabel, save, custom_ylimits,
+                                truncated_paf_experiments= None):
         u_values = configs["u_values"]
         correct_obs = configs["correct_obs"]
         
@@ -174,6 +175,7 @@ class Analysis:
             y_limits = Analysis.defYLimits(u_values, multidupehack_experiments, paf_experiments)
         
         for u in u_values:
+            print(f"Plotting {ylabel} for u={u}")
             fig, ax = plt.subplots()
             xlabel = f"nb. of correct observations"
             
@@ -182,13 +184,24 @@ class Analysis:
                 
             filtered_paf_experiments = Analysis.\
                 filterExperimentsByEpsilon(paf_experiments, u)
+
                 
             x1,y1 = Analysis.getXYFromExperiments(filtered_multidupehack_experiments)
             x2,y2 = Analysis.getXYFromExperiments(filtered_paf_experiments)
             
             Analysis.plotGraph(x1,y1,u,"blue",xlabel,ylabel, "multidupehack", y_limits)
             Analysis.plotGraph(x2,y2,u,"red",xlabel,ylabel, "paf", y_limits)
-            
+
+            if truncated_paf_experiments is not None: # nb of patterns graph
+                filtered_paf_experiments = Analysis.\
+                            filterExperimentsByEpsilon(truncated_paf_experiments, u)
+                nb_truncated_patterns = configs["nb_of_truncated_patterns"]
+
+                x4,y4 = Analysis.getXYFromExperiments(filtered_paf_experiments)
+                legend = f"First {nb_truncated_patterns} paf patterns"
+                Analysis.plotGraph(x4,y4,u,"magenta",xlabel,ylabel, legend, y_limits)
+                # =====================================================================================
+
             if ylabel == "Run time": 
                 # time graph, show time of multidupehack + paf
                 x3 = x1
@@ -219,11 +232,15 @@ class Analysis:
     
     @staticmethod
     def plotScoreGraph(configs, save=False, custom_ylimits=True):
+        print("Evaluating multidupehack files")
         multidupehack_experiments = Evaluation.evaluateMultidupehackFiles(configs) # {i_experiment: score}
+        print("Evaluating paf files")
         paf_experiments = Evaluation.evaluatePafFiles(configs) # {i_experiment: score}
+        print("Evaluating truncated paf files")
+        truncated_paf_experiments = Evaluation.evaluatePafFiles(configs, truncate=True) # {i_experiment: score}
         Analysis.plotExperimentsByUValue(configs, \
                 multidupehack_experiments, paf_experiments, \
-                "Quality", save, custom_ylimits)
+                "Quality", save, custom_ylimits, truncated_paf_experiments = truncated_paf_experiments)
 
     @staticmethod
     def plotMultipleGraphs(configs, save=False, custom_ylimits=True):

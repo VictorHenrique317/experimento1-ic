@@ -27,13 +27,16 @@ with open("configs.json", "r") as file:
 #     # Paf.run(i,a=10) # resultados estranhos
 
 # Analysis.plotMultipleGraphs(configs, save=True, custom_ylimits=True)
-# translation = GETF.translateFuzzyTensor(configs, "../experiment/iterations/1/fuzzy_tensors/3d_test_fuzzy.fuzzy_tensor")
+# Analysis.plotScoreGraph(configs, save=True)
+# translation = GETF.translateFuzzyTensor(configs, "../experiment/iterations/1/fuzzy_tensors/2d_test_fuzzy.fuzzy_tensor", 1)
 # translation = GETF.translateFuzzyTensor(configs, "../experiment/iterations/1/fuzzy_tensors/dataset-co16.fuzzy_tensor", 1)
 # print(translation)
 getf_folder = "../libs/GETF"
 script_name = "run.R"
 
-path = "../experiment/iterations/1/numpy_tensors/dataset-co16.npy"
-Utils.execute(f"Rscript {getf_folder}/{script_name} {path} 0.6 20 1 co16-e3.6-s3 co16")
-# GETF.run(configs, 1)
+path = "../experiment/iterations/1/numpy_tensors/2d_test_fuzzy.npy"
+# Utils.execute(f"Rscript {getf_folder}/{script_name} {path} 0.9 20 1 co16-e3.6-s3 2d_test_fuzzy")
+pattern_file_path = f"../experiment/iterations/1/co16-e3.6-s3/getf/2d_test_fuzzy.npy"
+# GETF.translateNumpyPatterns(configs, pattern_file_path, "co16.getf", 1)
+GETF.run(configs, 1)
 

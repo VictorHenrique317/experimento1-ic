@@ -10,6 +10,8 @@ class LogModel:
         with open(self.path) as log:
             for line in log:
                 match = re.findall("(.*):(.*)", line)
+                # if match == []:
+                #     continue
                 key = match[0][0]
                 value = match[0][1]
                 data[key] = value
