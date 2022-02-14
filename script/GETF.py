@@ -4,6 +4,7 @@ from Multidupehack import Multidupehack
 from Noise import Noise
 import numpy as np
 import re
+import os
 
 class GETF():
     def __init__(self) -> None:
@@ -24,7 +25,7 @@ class GETF():
     @staticmethod
     def translateFuzzyTensor(configs, fuzzy_path, iteration):
         dataset_size = configs["dataset_size"]
-        # dataset_size = [4,4]
+        # dataset_size = [5,5]
         translated_tensor =  np.zeros(dataset_size)
         # depth, row, column
         
@@ -48,14 +49,44 @@ class GETF():
         return translated_tensor_path + ".npy"
     
     @staticmethod
-    def translateNumpyPatterns(configs, pattern_file_path, getf_name, iteration):
-        print("================================")
-        numpy_tensor = np.load(pattern_file_path)
-        patterns = [pattern for pattern in numpy_tensor]
-        # reconstructed_tensor = 
-        for index, value in np.ndenumerate(numpy_tensor):
-            # print(f"{index} = {value}")
-            pass
+    def translateNumpyPatterns(configs, folder_path, dimensions):
+        getf_patterns = [] # [[{},{}], [{},{}]]
+
+        numpy_patterns = os.listdir(folder_path)
+        for numpy_pattern in numpy_patterns:
+            if re.search("npy", numpy_pattern) is None: # picked wrong file
+                continue
+            tuples = [set() for dimension in range(dimensions)]
+            pattern_file_path = f"{folder_path}/{numpy_pattern}"
+
+            numpy_pattern = np.load(pattern_file_path)
+            for index, value in np.ndenumerate(numpy_pattern):
+                if value == 0: # dont add dimensions to tuple
+                    continue
+                for n in range(len(index)): # iterates over all indices of the index
+                    nth_tuple = tuples[n]
+                    nth_tuple.add(index[n])
+
+            getf_patterns.append(tuples)
+
+        return getf_patterns
+                
+    @staticmethod
+    def createGetfFile(configs, folder_path, getf_name):
+        dimensions = len(configs["dataset_size"])
+        # dimensions = 2
+        getf_file_path = f"{folder_path}/{getf_name}"
+        getf_patterns = GETF.translateNumpyPatterns(configs, folder_path, dimensions)
+        with open(getf_file_path, "a") as getf_file:
+            for pattern in getf_patterns: #pattern = [{}, {}, {}]
+                line = ""
+                for d_tuple in pattern:
+                    line += str(d_tuple).replace("{","").replace("}","").replace(" ","") # d_tuple = {}
+                    line += " "
+                line = line.strip()
+                line += "\n"
+                getf_file.write(line)
+        
 
     @staticmethod   
     def run(configs, iteration):
@@ -87,12 +118,10 @@ class GETF():
                 getf_name = GETF.genGETFName(observations, noise_endurance, max_pattern_number)
                 numpy_name = GETF.genNumpyName(observations, noise_endurance, max_pattern_number)
                 
-                
                 output_folder = f"../experiment/iterations/{iteration}/{experiment_folder_name}/getf"
                 Utils.createFolder(output_folder)
-
-                # getf_name = GETF.genGETFName(observations, noise_endurance, max_pattern_number)
-                # getf_name = "co16"
+                # print(output_folder)
+        
                 #numpy_tensor_path, noise_endurance, max_pattern_number
                 command = f"Rscript {getf_folder}/{script_name} {translated_tensor_path} "
                 command += f"{noise_endurance} "
@@ -108,8 +137,8 @@ class GETF():
                 #prints the progression
                 print(f"({counter} of {total_count} done)")
                 print("="*120)
-                # pattern_file_path = f"../experiment/iterations/{iteration}/{experiment_folder_name}/getf/{numpy_name}"
-                # GETF.translateNumpyPatterns(configs, pattern_file_path, getf_name, iteration)
+                folder_path = f"../experiment/iterations/{iteration}/{experiment_folder_name}/getf"
+                GETF.createGetfFile(configs, folder_path, getf_name)
                 
         # getf_folder = "../libs/GETF"
         # script_name = "run.R"

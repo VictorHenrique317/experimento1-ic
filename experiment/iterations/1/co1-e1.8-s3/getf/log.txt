@@ -1,0 +1,2 @@
+Nb of selected patterns: 0
+Total time: 0.506979942321777

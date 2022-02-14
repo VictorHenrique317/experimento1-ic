@@ -17,7 +17,7 @@
 	},
 
 	"nb_of_truncated_patterns": 4,
-	"getf_max_pattern_number": 100
+	"getf_max_pattern_number": 1000000000
 	
 }
 

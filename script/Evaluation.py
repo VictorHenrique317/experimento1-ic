@@ -195,16 +195,15 @@ class Evaluation:
         return averaged_experiments
     
     @staticmethod
-    def evaluateFiles(configs, multidupehack=False, paf=False, truncate=False): 
+    def evaluateFiles(configs, multidupehack=False, paf=False, getf=False,truncate=False): 
         Evaluation.__dimension = Evaluation.getDimension()
-        if multidupehack is False and paf is False:
-            raise ValueError("multidupehack or paf should be True")
-            
         file_type = None
         if multidupehack:
             file_type = "multidupehack"
         elif paf:
             file_type = "paf"
+        elif getf:
+            file_type = "getf"
             
         base_folder = None
         experiments = dict() # {i_experiment: [value1, value2, ...]
@@ -216,8 +215,23 @@ class Evaluation:
                 if re.search(experiments_pattern, experiment) is None: # picked wrong folder
                     continue
                 path = f"{base_folder}/{experiment}/{file_type}/{experiment}.{file_type}"
+                if getf:
+                    files = os.listdir(f"{base_folder}/{experiment}/{file_type}")
+                    getf_file = None
+                    for file in files:
+                        # print(re.search("getf", file)[0])
+                        if re.search("getf", file) is not None:
+                            getf_file = file
+                            break
+                    path = f"{base_folder}/{experiment}/{file_type}/{getf_file}"
                 print(f"Evaluating {path}")
                 value = Evaluation.calculateQualityMeasure(configs, path, truncate)
+
+                if getf: # retirar na versao 2.0
+                    files = os.listdir(f"{base_folder}/{experiment}/{file_type}/")
+                    experiment = files[0]
+                    experiment = re.sub(".getf", "", experiment)
+                
                 experiments.setdefault(experiment, [])
                 experiments[experiment].append(value)
         
@@ -230,3 +244,7 @@ class Evaluation:
     @staticmethod
     def evaluatePafFiles(configs, truncate=False):
         return Evaluation.evaluateFiles(configs, paf=True, truncate=truncate)
+
+    @staticmethod
+    def evaluateGetfFiles(configs):
+        return Evaluation.evaluateFiles(configs, getf=True)

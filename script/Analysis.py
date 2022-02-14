@@ -5,6 +5,7 @@ from Utils import Utils
 from Multidupehack import Multidupehack
 from Evaluation import Evaluation
 from statistics import mean
+from GETF import GETF
 import re
 import matplotlib.pyplot as plt
 import matplotlib.ticker
@@ -30,12 +31,14 @@ class Analysis:
         return mean(values)
     
     @staticmethod
-    def getLogsFor(paf=False, multidupehack=False):
+    def getLogsFor(paf=False, multidupehack=False, getf=False):
         log_type = None
         if paf is True:
             log_type = "paf"
         elif multidupehack is True:
             log_type = "multidupehack"
+        elif getf is True:
+            log_type = "getf"
         else:
             raise ValueError("Especify paf or multidupehack log type") 
             
@@ -46,9 +49,15 @@ class Analysis:
             for experiment in os.listdir(path):
                 if re.search(experiments_pattern, experiment) is None: # picked wrong folder
                     continue
+
                 log_path = f"{path}/{experiment}/{log_type}/log.txt"
                 log = LogModel(log_path)
-                
+
+                if getf: # retirar na versao 2.0
+                    files = os.listdir(f"{path}/{experiment}/getf")
+                    experiment = files[0]
+                    experiment = re.sub(".getf", "", experiment)
+
                 data.setdefault(experiment, [])
                 log_list = data[experiment]
                 log_list.append(log)
@@ -56,9 +65,9 @@ class Analysis:
         return data
         
     @staticmethod
-    def averageExperiments(attribute, paf=False, multidupehack=False):
+    def averageExperiments(attribute, paf=False, multidupehack=False, getf=False):
         # {i_experiment: [log1, log2, ..., logn]}
-        experiments = Analysis.getLogsFor(paf=paf, multidupehack=multidupehack)
+        experiments = Analysis.getLogsFor(paf=paf, multidupehack=multidupehack, getf=getf)
         experiment_averages = dict()
         
         for experiment in experiments:
@@ -73,6 +82,16 @@ class Analysis:
         filtered_experiments = dict()
         for experiment, average in experiments.items():
             if re.search(f"e{epsilon}", experiment) != None: # found
+                filtered_experiments[experiment] = average
+                
+        return filtered_experiments
+
+    @staticmethod
+    def filterExperimentsByNoiseEndurance(experiments, u):
+        ne = GETF.calculateNoiseEndurance(u)
+        filtered_experiments = dict()
+        for experiment, average in experiments.items():
+            if re.search(f"ne{ne}", experiment) != None: # found
                 filtered_experiments[experiment] = average
                 
         return filtered_experiments
@@ -165,7 +184,7 @@ class Analysis:
         
     @staticmethod
     def plotExperimentsByUValue(configs, multidupehack_experiments, \
-                                paf_experiments, ylabel, save, custom_ylimits,
+                                paf_experiments, getf_experiments, ylabel, save, custom_ylimits,
                                 truncated_paf_experiments= None):
         u_values = configs["u_values"]
         correct_obs = configs["correct_obs"]
@@ -185,12 +204,17 @@ class Analysis:
             filtered_paf_experiments = Analysis.\
                 filterExperimentsByEpsilon(paf_experiments, u)
 
+            filtered_getf_experiments = Analysis.\
+                filterExperimentsByNoiseEndurance(getf_experiments,u)
+
                 
             x1,y1 = Analysis.getXYFromExperiments(filtered_multidupehack_experiments)
             x2,y2 = Analysis.getXYFromExperiments(filtered_paf_experiments)
+            x5,y5 = Analysis.getXYFromExperiments(filtered_getf_experiments)
             
             Analysis.plotGraph(x1,y1,u,"blue",xlabel,ylabel, "multidupehack", y_limits)
             Analysis.plotGraph(x2,y2,u,"red",xlabel,ylabel, "paf", y_limits)
+            Analysis.plotGraph(x5,y5,u,"green",xlabel,ylabel, "getf", y_limits)
 
             if truncated_paf_experiments is not None: # nb of patterns graph
                 filtered_paf_experiments = Analysis.\
@@ -206,7 +230,7 @@ class Analysis:
                 # time graph, show time of multidupehack + paf
                 x3 = x1
                 y3 = Utils.sumListElements(list(y1), list(y2))
-                Analysis.plotGraph(x3, y3, u,"green",xlabel,ylabel, "multidupehack + paf", y_limits)
+                Analysis.plotGraph(x3, y3, u,"purple",xlabel,ylabel, "multidupehack + paf", y_limits)
             if save is True:
                 graph_folder ="../experiment/analysis/graphs"
                 Utils.createFolder(graph_folder)
@@ -218,16 +242,19 @@ class Analysis:
                 plt.show()
     
     @staticmethod
-    def plotOverlappingGraphs(configs, multidupehack_attribute, paf_attribute,\
+    def plotOverlappingGraphs(configs, multidupehack_attribute, paf_attribute, getf_attribute,\
                               ylabel, save=False, custom_ylimits=True):
         multidupehack_experiment_averages = Analysis.\
             averageExperiments(multidupehack_attribute, multidupehack=True)
             
         paf_experiment_averages = Analysis.\
             averageExperiments(paf_attribute, paf=True)
-            
+
+        getf_experiment_averages = Analysis.\
+            averageExperiments(getf_attribute, getf=True)
+
         Analysis.plotExperimentsByUValue(configs, \
-                multidupehack_experiment_averages, paf_experiment_averages, \
+                multidupehack_experiment_averages, paf_experiment_averages, getf_experiment_averages,\
                 ylabel, save, custom_ylimits)
     
     @staticmethod
@@ -238,9 +265,12 @@ class Analysis:
         paf_experiments = Evaluation.evaluatePafFiles(configs) # {i_experiment: score}
         print("Evaluating truncated paf files")
         truncated_paf_experiments = Evaluation.evaluatePafFiles(configs, truncate=True) # {i_experiment: score}
+        print("Evaluating getf files")
+        getf_experiments = Evaluation.evaluateGetfFiles(configs) # {i_experiment: score}
         Analysis.plotExperimentsByUValue(configs, \
-                multidupehack_experiments, paf_experiments, \
+                multidupehack_experiments, paf_experiments, getf_experiments,\
                 "Quality", save, custom_ylimits, truncated_paf_experiments = truncated_paf_experiments)
+       
 
     @staticmethod
     def plotMultipleGraphs(configs, save=False, custom_ylimits=True):
@@ -250,8 +280,9 @@ class Analysis:
         for label, attributes in plot_attributes.items():
             multidupehack_attribute = attributes[0]
             paf_attribute = attributes[1]
+            getf_attribute = attributes[1]
             Analysis.plotOverlappingGraphs(configs, multidupehack_attribute, \
-                                           paf_attribute, label ,save=save, \
+                                           paf_attribute, getf_attribute, label ,save=save, \
                                            custom_ylimits=custom_ylimits)
         
         Analysis.plotScoreGraph(configs, save=save, custom_ylimits=custom_ylimits)

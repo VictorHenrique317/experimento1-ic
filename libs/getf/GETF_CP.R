@@ -337,32 +337,6 @@ Reconstruct_error<-function(TENS,BASIS){
   return(sum(abs(TENS-TENS_compare))/prod(dim(TENS)))
 }
 
-Get_Patterns<-function(TENS,BASIS){
-  Patterns <- list()
-  if(is.null(dim(BASIS[[1]]))){ 
-    TENS_temp<-BASIS[[1]]
-    for (i in 2:length(BASIS)) {
-      TENS_temp<-TENS_temp%o%BASIS[[i]]
-    }
-
-    Patterns[[j]] <- array(as.numeric(TENS_temp>0),dim=dim(TENS_temp))
-  }else{ 
-    TENS_compare<-0*TENS 
-    
-    i <- 0
-    for (j in 1:ncol(BASIS[[1]])) {
-      TENS_temp<-BASIS[[1]][,j] 
-      for (i in 2:length(BASIS)) {
-        TENS_temp<-TENS_temp%o%BASIS[[i]][,j]
-      }
-      
-      Patterns[[j]] <- array(as.numeric(TENS_temp>0),dim=dim(TENS_temp))
-    }
-  }
-  
-  return(Patterns)
-}
-
 
 
 
@@ -386,3 +360,32 @@ Tensor_Simulate<-function(Dims,pattern=5,density=0.2,Noise=0.01){
   return(TENS)
 }
 
+Get_Patterns<-function(TENS,BASIS){
+  Patterns <- list()
+  if (length(BASIS[[1]]) == 0){
+    return(Patterns)
+  }
+
+  if(is.null(dim(BASIS[[1]]))){ 
+    TENS_temp<-BASIS[[1]]
+    for (i in 2:length(BASIS)) {
+      TENS_temp<-TENS_temp%o%BASIS[[i]]
+    }
+
+    Patterns[[j]] <- array(as.numeric(TENS_temp>0),dim=dim(TENS_temp))
+  }else{ 
+    TENS_compare<-0*TENS 
+    
+    i <- 0
+    for (j in 1:ncol(BASIS[[1]])) {
+      TENS_temp<-BASIS[[1]][,j] 
+      for (i in 2:length(BASIS)) {
+        TENS_temp<-TENS_temp%o%BASIS[[i]][,j]
+      }
+      
+      Patterns[[j]] <- array(as.numeric(TENS_temp>0),dim=dim(TENS_temp))
+    }
+  }
+  
+  return(Patterns)
+}
